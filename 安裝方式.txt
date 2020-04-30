@@ -22,6 +22,9 @@ root=D:/JavaProjects/HanLP/
 
 =====================================================================================================================
 centos 7安裝chrome
+$ wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+$ sudo yum install ./google-chrome-stable_current_*.rpm
+$ google-chrome &
 1./usr/share/application/ 目录下的 Google Chrome 图标复制到桌面，如图：
 2.桌面圖示修改為:/usr/bin/google-chrome-stable %U --no-sandbox
 3.ssh指令
