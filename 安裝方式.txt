@@ -1,0 +1,21 @@
+1.官網:http://hanlp.com/
+教學網站:https://clay-atlas.com/blog/2019/09/25/python-chinese-tutorial-hanlp/
+  pip3 install opencc-python-reimplemented
+  pip3 install pyhanlp
+
+2.Python
+  pip install pyhanlp
+  
+3.下载：data.zip(http://nlp.hankcs.com/download.php?file=data)
+用户可以自行增删替换，如果不需要句法分析等功能的话，随时可以删除model文件夹。
+模型跟词典没有绝对的区别，隐马模型被做成人人都可以编辑的词典形式，不代表它不是模型。
+GitHub代码库中已经包含了data.zip中的词典，直接编译运行自动缓存即可；模型则需要额外下载。
+
+4.下载jar和配置文件：hanlp-release.zip(http://nlp.hankcs.com/download.php?file=jar)
+
+配置文件的作用是告诉HanLP数据包的位置，只需修改第一行
+root=D:/JavaProjects/HanLP/
+为data的父目录即可，比如data目录是/Users/hankcs/Documents/data，那么root=/Users/hankcs/Documents/ 。
+最后将hanlp.properties放入classpath即可，对于多数项目，都可以放到src或resources目录下，编译时IDE会自动将其复制到classpath中。
+除了配置文件外，还可以使用环境变量HANLP_ROOT来设置root。安卓项目请参考demo。
+如果放置不当，HanLP会提示当前环境下的合适路径，并且尝试从项目根目录读取数据集。
