@@ -19,3 +19,10 @@ root=D:/JavaProjects/HanLP/
 最后将hanlp.properties放入classpath即可，对于多数项目，都可以放到src或resources目录下，编译时IDE会自动将其复制到classpath中。
 除了配置文件外，还可以使用环境变量HANLP_ROOT来设置root。安卓项目请参考demo。
 如果放置不当，HanLP会提示当前环境下的合适路径，并且尝试从项目根目录读取数据集。
+
+=====================================================================================================================
+centos 7安裝chrome
+1./usr/share/application/ 目录下的 Google Chrome 图标复制到桌面，如图：
+2.桌面圖示修改為:/usr/bin/google-chrome-stable %U --no-sandbox
+3.ssh指令
+ $ /usr/bin/google-chrome --no-sandbox
