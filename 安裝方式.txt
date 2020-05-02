@@ -29,3 +29,12 @@ $ google-chrome &
 2.桌面圖示修改為:/usr/bin/google-chrome-stable %U --no-sandbox
 3.ssh指令
  $ /usr/bin/google-chrome --no-sandbox
+=====================================================================================================================
+pyhanlp 文本分類與情感分析
+https://blog.csdn.net/FontThrone/article/details/82831801
+
+python keras bert　ChnSentiCorp情感分析
+https://www.twblogs.net/a/5cd0aab0bd9eee67a77ebf9d
+
+谷歌全新開源人工智能係統TensorFlow官方文檔中文版
+https://github.com/jikexueyuanwiki/tensorflow-zh
