@@ -38,3 +38,6 @@ https://www.twblogs.net/a/5cd0aab0bd9eee67a77ebf9d
 
 谷歌全新開源人工智能係統TensorFlow官方文檔中文版
 https://github.com/jikexueyuanwiki/tensorflow-zh
+
+中文情感分析語料庫
+https://www.twblogs.net/a/5b8d139c2b717718833a9960
