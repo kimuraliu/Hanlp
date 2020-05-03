@@ -1,0 +1,262 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat May  2 17:16:12 2020
+
+@author: kimura
+"""
+
+"""
+#01
+from pyhanlp import *
+analyer = PerceptronLexicalAnalyzer()
+print(analyer.analyze('華安工業（集團）公司董事長譚旭光和祕書胡花蕊來到美國紐約現代藝術博物館參觀。'))
+
+#for term in HanLP.segment('華安工業（集團）公司董事長譚旭光和祕書胡花蕊來到美國紐約現代藝術博物館參觀。'):
+#    print('{}\t{}'.format(term.word, term.nature))
+    
+    #句法分析
+    #利用語法分析，我們可以讓計算機理解一句話到底在講什麼。在HanLP中，我們建立一個語法分析器，
+    #並且將語法分析器的分詞器設定為上面的繁體中文分詞器，於是就可以解析繁體中文的語法了：
+parser = JClass('com.hankcs.hanlp.dependency.nnparser.NeuralNetworkDependencyParser')()
+parser.enableDeprelTranslator(False)
+parser.setSegment(analyer._proxy)
+print(parser.parse('徐先生還具體幫助他確定了把畫雄鷹、松鼠和麻雀作為主攻目標。'))
+
+"""
+
+'''
+#02 文本分類語料庫
+from pyhanlp import *
+
+import zipfile
+import os
+from pyhanlp.static import download, remove_file, HANLP_DATA_PATH
+
+def test_data_path():
+    """
+    #获取测试数据路径，位于$root/data/test，根目录由配置文件指定。
+    #:return:
+    """
+    HANLP_DATA_PATH = r"D:\HanLP"
+    data_path = os.path.join(HANLP_DATA_PATH, 'test')
+    if not os.path.isdir(data_path):
+        os.mkdir(data_path)
+    return data_path
+
+
+
+## 验证是否存在 MSR语料库，如果没有自动下载
+def ensure_data(data_name, data_url):
+    root_path = test_data_path()
+    dest_path = os.path.join(root_path, data_name)
+    if os.path.exists(dest_path):
+        return dest_path
+    
+    if data_url.endswith('.zip'):
+        dest_path += '.zip'
+    download(data_url, dest_path)
+    if data_url.endswith('.zip'):
+        with zipfile.ZipFile(dest_path, "r") as archive:
+            archive.extractall(root_path)
+        remove_file(dest_path)
+        dest_path = dest_path[:-len('.zip')]
+    return dest_path
+
+
+sogou_corpus_path = ensure_data('搜狗文本分类语料库迷你版', 'http://file.hankcs.com/corpus/sogou-text-classification-corpus-mini.zip')
+
+
+
+
+AbstractDataSet = JClass('com.hankcs.hanlp.classification.corpus.AbstractDataSet')
+Document = JClass('com.hankcs.hanlp.classification.corpus.Document')
+FileDataSet = JClass('com.hankcs.hanlp.classification.corpus.FileDataSet')
+MemoryDataSet = JClass('com.hankcs.hanlp.classification.corpus.MemoryDataSet')
+
+# 演示加载文本分类语料库
+if __name__ == '__main__':
+    dataSet = MemoryDataSet()  # ①将数据集加载到内存中
+    dataSet.load(sogou_corpus_path)  # ②加载data/test/搜狗文本分类语料库迷你版
+    dataSet.add("自然语言处理", "自然语言处理很有趣")  # ③新增样本
+    allClasses = dataSet.getCatalog().getCategories()  # ④获取标注集
+    print("标注集：%s" % (allClasses))
+    for document in dataSet.iterator():
+        print("第一篇文档的类别：" + allClasses.get(document.category))
+        break
+'''
+
+'''
+#03 樸素貝葉斯分類器實現
+from pyhanlp import SafeJClass
+
+
+import zipfile
+import os
+from pyhanlp.static import download, remove_file, HANLP_DATA_PATH
+
+def test_data_path():
+    """
+    获取测试数据路径，位于$root/data/test，根目录由配置文件指定。
+    :return:
+    """
+    HANLP_DATA_PATH = r"D:\HanLP"
+    data_path = os.path.join(HANLP_DATA_PATH, 'test')
+    if not os.path.isdir(data_path):
+        os.mkdir(data_path)
+    return data_path
+
+
+
+## 验证是否存在 MSR语料库，如果没有自动下载
+def ensure_data(data_name, data_url):
+    root_path = test_data_path()
+    dest_path = os.path.join(root_path, data_name)
+    if os.path.exists(dest_path):
+        return dest_path
+    
+    if data_url.endswith('.zip'):
+        dest_path += '.zip'
+    download(data_url, dest_path)
+    if data_url.endswith('.zip'):
+        with zipfile.ZipFile(dest_path, "r") as archive:
+            archive.extractall(root_path)
+        remove_file(dest_path)
+        dest_path = dest_path[:-len('.zip')]
+    return dest_path
+
+
+sogou_corpus_path = ensure_data('搜狗文本分类语料库迷你版', 'http://file.hankcs.com/corpus/sogou-text-classification-corpus-mini.zip')
+
+
+## ===============================================
+## 以下开始朴素贝叶斯分类
+
+
+
+NaiveBayesClassifier = SafeJClass('com.hankcs.hanlp.classification.classifiers.NaiveBayesClassifier')
+IOUtil = SafeJClass('com.hankcs.hanlp.corpus.io.IOUtil')
+
+
+def train_or_load_classifier():
+    model_path = sogou_corpus_path + '.ser'
+    if os.path.isfile(model_path):
+        return NaiveBayesClassifier(IOUtil.readObjectFrom(model_path))
+    classifier = NaiveBayesClassifier()                                # 朴素贝叶斯分类器
+    classifier.train(sogou_corpus_path)
+    model = classifier.getModel()
+    IOUtil.saveObjectTo(model, model_path)
+    return NaiveBayesClassifier(model)
+
+
+def predict(classifier, text):
+    print("《%16s》\t属于分类\t【%s】" % (text, classifier.classify(text)))
+    # 如需获取离散型随机变量的分布，请使用predict接口
+    # print("《%16s》\t属于分类\t【%s】" % (text, classifier.predict(text)))
+
+
+if __name__ == '__main__':
+    classifier = train_or_load_classifier()
+    predict(classifier, "C罗获2018环球足球奖最佳球员 德尚荣膺最佳教练")
+    predict(classifier, "英国造航母耗时8年仍未服役 被中国速度远远甩在身后")
+    predict(classifier, "研究生考录模式亟待进一步专业化")
+    predict(classifier, "如果真想用食物解压,建议可以食用燕麦")
+    predict(classifier, "通用及其部分竞争对手目前正在考虑解决库存问题")
+'''
+
+"""
+#04線性支持向量機文本分類器實現
+#實現代碼詳見: svm_text_classification.py
+from pyhanlp.static import STATIC_ROOT, download
+
+
+import zipfile
+import os
+from pyhanlp.static import download, remove_file, HANLP_DATA_PATH
+
+def test_data_path():
+    '''
+    获取测试数据路径，位于$root/data/test，根目录由配置文件指定。
+    :return:
+    '''
+    HANLP_DATA_PATH = r"D:\HanLP"
+    data_path = os.path.join(HANLP_DATA_PATH, 'test')
+    if not os.path.isdir(data_path):
+        os.mkdir(data_path)
+    return data_path
+
+
+
+## 验证是否存在 MSR语料库，如果没有自动下载
+def ensure_data(data_name, data_url):
+    root_path = test_data_path()
+    dest_path = os.path.join(root_path, data_name)
+    if os.path.exists(dest_path):
+        return dest_path
+    
+    if data_url.endswith('.zip'):
+        dest_path += '.zip'
+    download(data_url, dest_path)
+    if data_url.endswith('.zip'):
+        with zipfile.ZipFile(dest_path, "r") as archive:
+            archive.extractall(root_path)
+        remove_file(dest_path)
+        dest_path = dest_path[:-len('.zip')]
+    return dest_path
+
+
+sogou_corpus_path = ensure_data('搜狗文本分类语料库迷你版', 'http://file.hankcs.com/corpus/sogou-text-classification-corpus-mini.zip')
+
+
+## ===============================================
+## 以下开始 支持向量机SVM
+
+
+
+def install_jar(name, url):
+    dst = os.path.join(STATIC_ROOT, name)
+    if os.path.isfile(dst):
+        return dst
+    download(url, dst)
+    return dst
+
+
+#下载 http://file.hankcs.com/bin/text-classification-svm-1.0.2.jar 到 C:\Users\kimura\Anaconda3\lib\site-packages\pyhanlp\static\text-classification-svm-1.0.2.jar
+#100.00%, 0 MB, 410 KB/s, 还有 0 分  0 秒   
+#下载 http://file.hankcs.com/bin/liblinear-1.95.jar 到 C:\Users\kimura\Anaconda3\lib\site-packages\pyhanlp\static\liblinear-1.95.jar
+#100.00%, 0 MB, 293 KB/s, 还有 0 分  0 秒   
+
+install_jar('text-classification-svm-1.0.2.jar', 'http://file.hankcs.com/bin/text-classification-svm-1.0.2.jar')
+install_jar('liblinear-1.95.jar', 'http://file.hankcs.com/bin/liblinear-1.95.jar')
+from pyhanlp import *
+
+LinearSVMClassifier = SafeJClass('com.hankcs.hanlp.classification.classifiers.LinearSVMClassifier')
+IOUtil = SafeJClass('com.hankcs.hanlp.corpus.io.IOUtil')
+
+
+def train_or_load_classifier():
+    model_path = sogou_corpus_path + '.svm.ser'
+    if os.path.isfile(model_path):
+        return LinearSVMClassifier(IOUtil.readObjectFrom(model_path))
+    classifier = LinearSVMClassifier()
+    classifier.train(sogou_corpus_path)
+    model = classifier.getModel()
+    IOUtil.saveObjectTo(model, model_path)
+    return LinearSVMClassifier(model)
+
+
+def predict(classifier, text):
+    print("《%16s》\t属于分类\t【%s】" % (text, classifier.classify(text)))
+    # 如需获取离散型随机变量的分布，请使用predict接口
+    # print("《%16s》\t属于分类\t【%s】" % (text, classifier.predict(text)))
+
+
+if __name__ == '__main__':
+    classifier = train_or_load_classifier()
+    predict(classifier, "C罗获2018环球足球奖最佳球员 德尚荣膺最佳教练")
+    predict(classifier, "潜艇具有很强的战略威慑能力与实战能力")
+    predict(classifier, "研究生考录模式亟待进一步专业化")
+    predict(classifier, "如果真想用食物解压,建议可以食用燕麦")
+    predict(classifier, "通用及其部分竞争对手目前正在考虑解决库存问题")
+    
+"""
+
